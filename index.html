@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f6f5f1">
+<link rel="manifest" href="manifest.json">
+<title>Расписание 612-Б</title>
+<style>
+:root{color-scheme:light;--bg:#f6f5f1;--card:#fff;--ink:#1d1d1f;--mute:#8a8a8e;--line:#e7e5df;--acc:#3b5bdb;--warn:#e8590c;--warnbg:#fff4e6}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);padding:20px 16px 60px;max-width:640px;margin:0 auto}
+header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px}
+h1{font-size:26px;font-weight:700;letter-spacing:-.5px}
+.week{font-size:13px;font-weight:600;padding:4px 10px;border-radius:20px;background:var(--acc);color:#fff;animation:pop .4s ease}
+.week.num{background:#2f9e44}
+a.small{color:var(--mute);font-size:13px;text-decoration:none}
+.bar{display:flex;gap:6px;margin:10px 0;flex-wrap:wrap}
+.seg{display:flex;background:#ebe9e3;border-radius:12px;padding:3px;position:relative}
+.seg button{border:0;background:none;padding:7px 12px;border-radius:9px;font:inherit;font-size:14px;color:var(--mute);cursor:pointer;transition:all .2s}
+.seg button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 3px #0002}
+.days{display:flex;gap:6px;overflow-x:auto;padding:4px 0 10px;scrollbar-width:none}
+.days button{flex:0 0 auto;border:1px solid var(--line);background:var(--card);border-radius:12px;padding:6px 0;width:52px;font:inherit;cursor:pointer;transition:transform .15s,background .2s}
+.days button:active{transform:scale(.94)}
+.days button b{display:block;font-size:17px}.days button small{font-size:11px;color:var(--mute)}
+.days button.on{background:var(--ink);color:#fff;border-color:var(--ink)}.days button.on small{color:#ccc}
+.days button.today{border-color:var(--acc)}
+.title{font-size:15px;color:var(--mute);margin:8px 2px 10px}
+.list{display:flex;flex-direction:column;gap:8px}
+.card{background:var(--card);border-radius:16px;padding:12px 14px;display:flex;gap:12px;box-shadow:0 1px 2px #0000000d;opacity:0;transform:translateY(10px);animation:in .35s ease forwards}
+.card .n{font-size:22px;font-weight:700;color:var(--acc);min-width:22px;line-height:1.1}
+.card .t{font-size:11px;color:var(--mute);display:block;font-weight:400}
+.card .s{font-weight:600}
+.card .m{font-size:13px;color:var(--mute);margin-top:2px}
+.card .room{margin-left:auto;font-size:13px;font-weight:600;white-space:nowrap;align-self:flex-start;background:#f1f3f5;padding:3px 8px;border-radius:8px}
+.tag{font-size:11px;background:#edf2ff;color:var(--acc);padding:1px 6px;border-radius:6px;margin-left:4px;vertical-align:2px}
+.card.chg{background:var(--warnbg);border-left:4px solid var(--warn)}
+.card.chg .n{color:var(--warn)}
+.old{text-decoration:line-through;color:var(--mute);font-size:13px}
+.empty{text-align:center;color:var(--mute);padding:40px 0;animation:fade .4s}
+.note{font-size:13px;background:var(--warnbg);border-radius:12px;padding:10px 12px;margin-bottom:10px;animation:fade .4s}
+.note b{color:var(--warn)}
+.raw{font-size:13px;margin-top:4px;white-space:pre-wrap}
+footer{margin-top:24px;font-size:12px;color:var(--mute);text-align:center}
+@keyframes in{to{opacity:1;transform:none}}
+@keyframes fade{from{opacity:0}}
+@keyframes pop{from{transform:scale(.7);opacity:0}}
+</style>
+</head>
+<body>
+<header><h1>612-Б</h1><span id="week" class="week"></span></header>
+<div class="bar">
+  <div class="seg" id="sg">
+    <button data-v="1">1 подгруппа</button><button data-v="2">2 подгруппа</button><button data-v="0">Обе</button>
+  </div>
+  <a class="small" href="bells.html" style="margin-left:auto;align-self:center">🔔 Звонки</a>
+</div>
+<div class="days" id="days"></div>
+<div class="title" id="title"></div>
+<div id="notes"></div>
+<div class="list" id="list"></div>
+<footer id="foot"></footer>
+
+<script src="schedule.js"></script>
+<script>
+const DAYS=["Вс","Пн","Вт","Ср","Чт","Пт","Сб"];
+const DAYS_FULL=["Воскресенье","Понедельник","Вторник","Среда","Четверг","Пятница","Суббота"];
+const MON=["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"];
+const $=id=>document.getElementById(id);
+const iso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+const today=new Date();today.setHours(0,0,0,0);
+
+let subgroup=+(localStorage.getItem("sg")??1);
+let selected=new Date(today);
+if(selected.getDay()===0)selected.setDate(selected.getDate()+1);
+let changes=null;
+
+function weekType(d){
+  const base=new Date(BASE_MONDAY+"T00:00:00");
+  const mon=new Date(d);mon.setDate(d.getDate()-((d.getDay()+6)%7));
+  const weeks=Math.round((mon-base)/(7*864e5));
+  const same=((weeks%2)+2)%2===0;
+  return same?BASE_TYPE:(BASE_TYPE==="num"?"den":"num");
+}
+
+function lessonsFor(d){
+  const day=SCHEDULE[d.getDay()]||{};const wt=weekType(d);const out=[];
+  for(let p=1;p<=7;p++){
+    const slot=day[p];if(!slot)continue;
+    const list=(slot.all||slot[wt]||[]).filter(l=>!subgroup||!l.sg||l.sg===subgroup);
+    if(list.length)out.push({p,list});
+  }
+  return out;
+}
+
+function changesFor(d){
+  if(!changes)return null;
+  for(const f of Object.values(changes.files||{}))
+    if(f.ok&&f.date===iso(d))return f.entries;
+  return null;
+}
+
+function esc(s){return String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+
+function bell(p){const b=BELLS[p];return b&&b[0]?`<span class="t">${b[0]}–${b[1]}</span>`:""}
+
+function render(){
+  // недели
+  const wt=weekType(selected);const w=$("week");
+  w.textContent=wt==="num"?"Числитель":"Знаменатель";w.className="week "+wt;
+  // подгруппы
+  document.querySelectorAll("#sg button").forEach(b=>b.classList.toggle("on",+b.dataset.v===subgroup));
+  // дни: две недели вперёд
+  const box=$("days");box.innerHTML="";
+  const start=new Date(today);start.setDate(today.getDate()-((today.getDay()+6)%7));
+  for(let i=0;i<14;i++){
+    const d=new Date(start);d.setDate(start.getDate()+i);
+    if(d.getDay()===0)continue;
+    const b=document.createElement("button");
+    b.innerHTML=`<small>${DAYS[d.getDay()]}</small><b>${d.getDate()}</b>`;
+    if(+d===+selected)b.classList.add("on");
+    if(+d===+today)b.classList.add("today");
+    b.onclick=()=>{selected=d;render()};
+    box.appendChild(b);
+  }
+  const diff=Math.round((selected-today)/864e5);
+  const rel=diff===0?"Сегодня, ":diff===1?"Завтра, ":"";
+  $("title").textContent=`${rel}${DAYS_FULL[selected.getDay()].toLowerCase()}, ${selected.getDate()} ${MON[selected.getMonth()]}`;
+
+  // замены
+  const ch=changesFor(selected);const byPair={};const loose=[];
+  (ch||[]).forEach(e=>{if(e.pairs&&e.pairs.length)e.pairs.forEach(p=>(byPair[p]=byPair[p]||[]).push(e.text));else loose.push(e.text)});
+  let notes="";
+  if(ch&&ch.length)notes+=`<div class="note"><b>Есть замены на этот день.</b> Изменённые пары выделены оранжевым.${loose.length?`<div class="raw">${loose.map(esc).join("\n")}</div>`:""}</div>`;
+  $("notes").innerHTML=notes;
+
+  // пары
+  const lessons=lessonsFor(selected);const pairs=new Set([...lessons.map(l=>l.p),...Object.keys(byPair).map(Number)]);
+  const list=$("list");list.innerHTML="";let i=0;
+  [...pairs].sort((a,b)=>a-b).forEach(p=>{
+    const base=lessons.find(l=>l.p===p);const c=byPair[p];
+    const el=document.createElement("div");el.className="card"+(c?" chg":"");el.style.animationDelay=(i++*50)+"ms";
+    let body="";
+    if(c){
+      body=`<div class="s">${c.map(esc).join("<br>")}</div>`+(base?`<div class="old">${base.list.map(l=>esc(l.subj)).join(" / ")}</div>`:"");
+      el.innerHTML=`<div class="n">${p}${bell(p)}</div><div>${body}</div>`;
+    }else{
+      body=base.list.map(l=>`<div class="s">${esc(l.subj)}${l.sg&&!subgroup?`<span class="tag">${l.sg} п/г</span>`:""}</div><div class="m">${esc(l.teacher)}</div>`).join("");
+      const rooms=base.list.map(l=>l.room).filter(Boolean).join(" / ");
+      el.innerHTML=`<div class="n">${p}${bell(p)}</div><div>${body}</div>${rooms?`<div class="room">${esc(rooms)}</div>`:""}`;
+    }
+    list.appendChild(el);
+  });
+  if(!pairs.size)list.innerHTML=`<div class="empty">Пар нет 🎉</div>`;
+
+  const f=$("foot");
+  f.textContent=changes?`Замены обновлены: ${new Date(changes.updated).toLocaleString("ru-RU",{day:"numeric",month:"long",hour:"2-digit",minute:"2-digit"})}`:"Замены не загружены (сайт открыт без интернета или с компьютера как файл)";
+}
+
+document.querySelectorAll("#sg button").forEach(b=>b.onclick=()=>{subgroup=+b.dataset.v;localStorage.setItem("sg",subgroup);render()});
+
+let x0=null;
+document.addEventListener("touchstart",e=>x0=e.touches[0].clientX,{passive:true});
+document.addEventListener("touchend",e=>{if(x0===null)return;const dx=e.changedTouches[0].clientX-x0;x0=null;
+  if(Math.abs(dx)<60)return;const d=new Date(selected);do{d.setDate(d.getDate()+(dx<0?1:-1))}while(d.getDay()===0);selected=d;render()});
+
+render();
+fetch("changes.json?"+Date.now()).then(r=>r.json()).then(j=>{changes=j;render()}).catch(()=>{});
+</script>
+</body>
+</html>

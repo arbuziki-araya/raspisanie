@@ -1,0 +1,8 @@
+{
+  "name": "Расписание 612-Б",
+  "short_name": "612-Б",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#f6f5f1",
+  "theme_color": "#f6f5f1"
+}
