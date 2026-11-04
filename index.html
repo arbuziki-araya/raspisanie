@@ -19,7 +19,11 @@ a.small{color:var(--mute);font-size:13px;text-decoration:none}
 .seg{display:flex;background:#ebe9e3;border-radius:12px;padding:3px;position:relative}
 .seg button{border:0;background:none;padding:7px 12px;border-radius:9px;font:inherit;font-size:14px;color:var(--mute);cursor:pointer;transition:all .2s}
 .seg button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 3px #0002}
-.days{display:flex;gap:6px;overflow-x:auto;padding:4px 0 10px;scrollbar-width:none}
+.nav{display:flex;align-items:center;gap:4px}
+.nav>button{flex:0 0 32px;height:44px;border:0;background:none;font-size:26px;color:var(--mute);cursor:pointer;border-radius:10px;transition:background .2s}
+.nav>button:active{background:#ebe9e3}
+.todayBtn{border:0;background:none;color:var(--acc);font:inherit;font-size:13px;cursor:pointer;padding:0 2px;visibility:hidden}
+.days{display:flex;gap:6px;overflow-x:auto;padding:4px 0 10px;scrollbar-width:none;flex:1;justify-content:space-between;animation:fade .3s}
 .days button{flex:0 0 auto;border:1px solid var(--line);background:var(--card);border-radius:12px;padding:6px 0;width:52px;font:inherit;cursor:pointer;transition:transform .15s,background .2s}
 .days button:active{transform:scale(.94)}
 .days button b{display:block;font-size:17px}.days button small{font-size:11px;color:var(--mute)}
@@ -55,7 +59,12 @@ footer{margin-top:24px;font-size:12px;color:var(--mute);text-align:center}
   </div>
   <a class="small" href="bells.html" style="margin-left:auto;align-self:center">🔔 Звонки</a>
 </div>
-<div class="days" id="days"></div>
+<div class="nav">
+  <button id="prev" aria-label="Предыдущая неделя">‹</button>
+  <div class="days" id="days"></div>
+  <button id="next" aria-label="Следующая неделя">›</button>
+</div>
+<button id="todayBtn" class="todayBtn">Сегодня</button>
 <div class="title" id="title"></div>
 <div id="notes"></div>
 <div class="list" id="list"></div>
@@ -110,10 +119,10 @@ function render(){
   w.textContent=wt==="num"?"Числитель":"Знаменатель";w.className="week "+wt;
   // подгруппы
   document.querySelectorAll("#sg button").forEach(b=>b.classList.toggle("on",+b.dataset.v===subgroup));
-  // дни: две недели вперёд
+  // дни: неделя, в которой выбранный день
   const box=$("days");box.innerHTML="";
-  const start=new Date(today);start.setDate(today.getDate()-((today.getDay()+6)%7));
-  for(let i=0;i<14;i++){
+  const start=new Date(selected);start.setDate(selected.getDate()-((selected.getDay()+6)%7));
+  for(let i=0;i<7;i++){
     const d=new Date(start);d.setDate(start.getDate()+i);
     if(d.getDay()===0)continue;
     const b=document.createElement("button");
@@ -123,6 +132,7 @@ function render(){
     b.onclick=()=>{selected=d;render()};
     box.appendChild(b);
   }
+  $("todayBtn").style.visibility=+start===+new Date(today.getFullYear(),today.getMonth(),today.getDate()-((today.getDay()+6)%7))?"hidden":"visible";
   const diff=Math.round((selected-today)/864e5);
   const rel=diff===0?"Сегодня, ":diff===1?"Завтра, ":"";
   $("title").textContent=`${rel}${DAYS_FULL[selected.getDay()].toLowerCase()}, ${selected.getDate()} ${MON[selected.getMonth()]}`;
@@ -159,6 +169,11 @@ function render(){
 
 document.querySelectorAll("#sg button").forEach(b=>b.onclick=()=>{subgroup=+b.dataset.v;localStorage.setItem("sg",subgroup);render()});
 
+function shiftWeek(n){const d=new Date(selected);d.setDate(d.getDate()+7*n);selected=d;render()}
+$("prev").onclick=()=>shiftWeek(-1);
+$("next").onclick=()=>shiftWeek(1);
+$("todayBtn").onclick=()=>{selected=new Date(today);if(selected.getDay()===0)selected.setDate(selected.getDate()+1);render()};
+
 let x0=null;
 document.addEventListener("touchstart",e=>x0=e.touches[0].clientX,{passive:true});
 document.addEventListener("touchend",e=>{if(x0===null)return;const dx=e.changedTouches[0].clientX-x0;x0=null;
@@ -169,3 +184,4 @@ fetch("changes.json?"+Date.now()).then(r=>r.json()).then(j=>{changes=j;render()}
 </script>
 </body>
 </html>
+
