@@ -165,11 +165,11 @@ function render(){
     let body="";
     if(c){
       body=`<div class="s">${c.map(esc).join("<br>")}</div>`+(base?`<div class="old">${base.list.map(l=>esc(l.subj)).join(" / ")}</div>`:"");
-      el.innerHTML=`<div class="n">${p}${bell(p)}</div><div>${body}</div>`;
+      el.innerHTML=`<div class="n">${HIDE_NUMBERS.includes(selected.getDay())?"":p}${bell(p)}</div><div>${body}</div>`;
     }else{
       body=base.list.map(l=>`<div class="s">${esc(l.subj)}${l.sg&&!subgroup?`<span class="tag">${l.sg} п/г</span>`:""}</div><div class="m">${esc(l.teacher)}</div>`).join("");
       const rooms=base.list.map(l=>l.room).filter(Boolean).join(" / ");
-      el.innerHTML=`<div class="n">${p}${bell(p)}</div><div>${body}</div>${rooms?`<div class="room">${esc(rooms)}</div>`:""}`;
+      el.innerHTML=`<div class="n">${HIDE_NUMBERS.includes(selected.getDay())?"":p}${bell(p)}</div><div>${body}</div>${rooms?`<div class="room">${esc(rooms)}</div>`:""}`;
     }
     list.appendChild(el);
   });
