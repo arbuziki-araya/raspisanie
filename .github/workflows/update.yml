@@ -1,0 +1,27 @@
+name: Обновить замены
+
+on:
+  schedule:
+    - cron: "15 3-17 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install python-docx
+      - run: python scripts/fetch_changes.py
+      - name: Сохранить, если что-то изменилось
+        run: |
+          git config user.name "bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add changes.json
+          git diff --cached --quiet || git commit -m "Обновлены замены"
+          git push
