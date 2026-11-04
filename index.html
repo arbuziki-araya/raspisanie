@@ -38,6 +38,8 @@ a.small{color:var(--mute);font-size:13px;text-decoration:none}
 .card .m{font-size:13px;color:var(--mute);margin-top:2px}
 .card .room{margin-left:auto;font-size:13px;font-weight:600;white-space:nowrap;align-self:flex-start;background:#f1f3f5;padding:3px 8px;border-radius:8px}
 .tag{font-size:11px;background:#edf2ff;color:var(--acc);padding:1px 6px;border-radius:6px;margin-left:4px;vertical-align:2px}
+.card.ev{background:#ecebe6;box-shadow:none;padding:9px 14px;align-items:center}
+.card.ev .s{font-weight:500;color:#55555a;font-size:14px}
 .card.chg{background:var(--warnbg);border-left:4px solid var(--warn)}
 .card.chg .n{color:var(--warn)}
 .old{text-decoration:line-through;color:var(--mute);font-size:13px}
@@ -111,7 +113,7 @@ function changesFor(d){
 
 function esc(s){return String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
 
-function bell(p){const b=BELLS[p];return b&&b[0]?`<span class="t">${b[0]}–${b[1]}</span>`:""}
+function bell(p){const b=(BELLS[selected.getDay()]||[]).find(x=>x.p===p);return b?`<span class="t">${b.s}<br>${b.e}</span>`:""}
 
 function render(){
   // недели
@@ -147,7 +149,17 @@ function render(){
   // пары
   const lessons=lessonsFor(selected);const pairs=new Set([...lessons.map(l=>l.p),...Object.keys(byPair).map(Number)]);
   const list=$("list");list.innerHTML="";let i=0;
-  [...pairs].sort((a,b)=>a-b).forEach(p=>{
+  const dayBells=BELLS[selected.getDay()]||[];
+  const pos=it=>{const i=dayBells.findIndex(b=>it.name?b===it:b.p===it.p);return i<0?100+(it.p||0):i};
+  const items=[...pairs].map(p=>({p}));
+  if(pairs.size)dayBells.filter(b=>b.name).forEach(b=>items.push(b));
+  items.sort((a,b)=>pos(a)-pos(b)).forEach(it=>{
+    if(it.name){
+      const ev=document.createElement("div");ev.className="card ev";ev.style.animationDelay=(i++*50)+"ms";
+      ev.innerHTML=`<div class="n"><span class="t">${it.s}<br>${it.e}</span></div><div class="s">${esc(it.name)}</div>`;
+      list.appendChild(ev);return;
+    }
+    const p=it.p;
     const base=lessons.find(l=>l.p===p);const c=byPair[p];
     const el=document.createElement("div");el.className="card"+(c?" chg":"");el.style.animationDelay=(i++*50)+"ms";
     let body="";
