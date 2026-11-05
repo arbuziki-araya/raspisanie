@@ -1,15 +1,8 @@
 {
- "updated": "2026-11-04T20:58+03:00",
+ "updated": "2026-11-05T07:02+03:00",
  "files": {
   "today": {
    "url": "http://smolapo.ru/sites/default/files/Studentam/2026-2027/izm1.docx",
-   "ok": false,
-   "date": null,
-   "entries": [],
-   "error": "HTTP Error 404: Not Found"
-  },
-  "tomorrow": {
-   "url": "http://smolapo.ru/sites/default/files/Studentam/2026-2027/izm2.docx",
    "ok": true,
    "date": "2026-11-05",
    "entries": [
@@ -32,6 +25,13 @@
      "text": "Подстановка | Информатика (2) | Итунина Е. А. | к/к4"
     }
    ]
+  },
+  "tomorrow": {
+   "url": "http://smolapo.ru/sites/default/files/Studentam/2026-2027/izm2.docx",
+   "ok": false,
+   "date": null,
+   "entries": [],
+   "error": "HTTP Error 404: Not Found"
   }
  }
 }
