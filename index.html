@@ -194,5 +194,27 @@ document.addEventListener("touchend",e=>{if(x0===null)return;const dx=e.changedT
 render();
 fetch("changes.json?"+Date.now()).then(r=>r.json()).then(j=>{changes=j;render()}).catch(()=>{});
 </script>
+<div style="text-align:center;margin-top:10px"><a id="spooky" style="font-size:11px;color:#bbb;cursor:pointer">© 2026</a></div>
+<div id="dark" style="position:fixed;inset:0;background:#000;opacity:0;pointer-events:none;z-index:99"></div>
+<img id="scr" src="scream.png" style="position:fixed;inset:0;width:100%;height:100%;object-fit:cover;display:none;z-index:100">
+<audio id="snd" src="scream.ogg" preload="auto"></audio>
+<style>@keyframes shake{0%,100%{transform:translate(0)scale(1.05)}25%{transform:translate(-15px,10px)scale(1.1)}75%{transform:translate(15px,-10px)scale(1.1)}}</style>
+<script>
+(()=>{let n=0;const a=document.getElementById("spooky"),d=document.getElementById("dark"),
+img=document.getElementById("scr"),s=document.getElementById("snd");
+a.onclick=()=>{n++;
+  a.style.transform="translateX("+(n%2?2:-2)+"px)";setTimeout(()=>a.style.transform="",100);
+  if(n<10)return; n=0;
+  s.play().then(()=>{s.pause();s.currentTime=0}).catch(()=>{});
+  d.style.pointerEvents="auto";d.style.opacity="0.8";
+  setTimeout(()=>{
+    img.style.display="block";img.style.animation="shake .1s infinite";
+    s.play();if(navigator.vibrate)navigator.vibrate([300,100,300]);
+    setTimeout(close, 4000); // <-- Вот эта строчка сама всё закроет ровно через 5 сек
+  },4000);
+
+ const close=()=>{img.style.display="none";d.style.opacity="0";d.style.pointerEvents="none";s.pause();s.currentTime=0};
+};})();
+</script>
 </body>
 </html>
