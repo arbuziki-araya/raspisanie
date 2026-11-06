@@ -1,33 +1,8 @@
 {
- "updated": "2026-11-05T20:25+03:00",
+ "updated": "2026-11-06T06:59+03:00",
  "files": {
   "today": {
    "url": "http://smolapo.ru/sites/default/files/Studentam/2026-2027/izm1.docx",
-   "ok": true,
-   "date": "2026-11-05",
-   "entries": [
-    {
-     "pairs": [
-      1
-     ],
-     "text": "МДК.01.01 (1) | Кириллова М. А. | Информатика (1) | Каневский А. С. (замещ) | к/к3"
-    },
-    {
-     "pairs": [
-      4
-     ],
-     "text": "Перенос с 1 пары | МДК.01.01 (1) | Кириллова М. А. | 401"
-    },
-    {
-     "pairs": [
-      5
-     ],
-     "text": "Подстановка | Информатика (2) | Итунина Е. А. | к/к4"
-    }
-   ]
-  },
-  "tomorrow": {
-   "url": "http://smolapo.ru/sites/default/files/Studentam/2026-2027/izm2.docx",
    "ok": true,
    "date": "2026-11-06",
    "entries": [
@@ -56,6 +31,12 @@
      "text": "Информатика (2) | вакансия | Информатика (2) | Итунина Е. А. | к/к4"
     }
    ]
+  },
+  "tomorrow": {
+   "url": "http://smolapo.ru/sites/default/files/Studentam/2026-2027/izm2.docx",
+   "ok": true,
+   "date": "2026-11-07",
+   "entries": []
   }
  }
 }
