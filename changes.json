@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-09T14:05+03:00",
+ "updated": "2026-11-09T15:04+03:00",
  "files": {
   "today": {
    "url": "http://smolapo.ru/sites/default/files/Studentam/2026-2027/izm1.docx",
@@ -28,10 +28,9 @@
   },
   "tomorrow": {
    "url": "http://smolapo.ru/sites/default/files/Studentam/2026-2027/izm2.docx",
-   "ok": false,
-   "date": null,
-   "entries": [],
-   "error": "HTTP Error 404: Not Found"
+   "ok": true,
+   "date": "2026-11-10",
+   "entries": []
   }
  }
 }
