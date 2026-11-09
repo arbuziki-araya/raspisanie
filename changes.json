@@ -1,14 +1,8 @@
 {
- "updated": "2026-11-09T09:24+03:00",
+ "updated": "2026-11-09T11:34+03:00",
  "files": {
   "today": {
    "url": "http://smolapo.ru/sites/default/files/Studentam/2026-2027/izm1.docx",
-   "ok": true,
-   "date": "2026-11-07",
-   "entries": []
-  },
-  "tomorrow": {
-   "url": "http://smolapo.ru/sites/default/files/Studentam/2026-2027/izm2.docx",
    "ok": true,
    "date": "2026-11-09",
    "entries": [
@@ -31,6 +25,13 @@
      "text": "По замене | Информатика (2) | Каневский А. С. | к/к3"
     }
    ]
+  },
+  "tomorrow": {
+   "url": "http://smolapo.ru/sites/default/files/Studentam/2026-2027/izm2.docx",
+   "ok": false,
+   "date": null,
+   "entries": [],
+   "error": "HTTP Error 404: Not Found"
   }
  }
 }
