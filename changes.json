@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-10T14:57+03:00",
+ "updated": "2026-11-10T16:12+03:00",
  "files": {
   "today": {
    "url": "http://smolapo.ru/sites/default/files/Studentam/2026-2027/izm1.docx",
@@ -9,10 +9,34 @@
   },
   "tomorrow": {
    "url": "http://smolapo.ru/sites/default/files/Studentam/2026-2027/izm2.docx",
-   "ok": false,
-   "date": null,
-   "entries": [],
-   "error": "HTTP Error 404: Not Found"
+   "ok": true,
+   "date": "2026-11-11",
+   "entries": [
+    {
+     "pairs": [
+      1
+     ],
+     "text": "Математика | Ромашкова И. А. | Нет"
+    },
+    {
+     "pairs": [
+      2
+     ],
+     "text": "МДК.01.01 | Кириллова М. А. | Математика | Ромашкова И. А. | 403"
+    },
+    {
+     "pairs": [
+      3
+     ],
+     "text": "Информатика | Вакансия | Информатика | Каражбей М. В. (зам) | 402"
+    },
+    {
+     "pairs": [
+      4
+     ],
+     "text": "Перенос с 2 пары | МДК.01.01 | Кириллова М. А. | 401"
+    }
+   ]
   }
  }
 }
