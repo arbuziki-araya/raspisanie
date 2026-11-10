@@ -1,36 +1,18 @@
 {
- "updated": "2026-11-10T10:20+03:00",
+ "updated": "2026-11-10T11:59+03:00",
  "files": {
   "today": {
    "url": "http://smolapo.ru/sites/default/files/Studentam/2026-2027/izm1.docx",
    "ok": true,
-   "date": "2026-11-09",
-   "entries": [
-    {
-     "pairs": [
-      2
-     ],
-     "text": "По замене | Информатика (1) | Каневский А. С. | к/к3"
-    },
-    {
-     "pairs": [
-      4
-     ],
-     "text": "Математика | Ромашкова И. А. | ПОЗИ | Сиволова О. Г. | к/к11"
-    },
-    {
-     "pairs": [
-      5
-     ],
-     "text": "По замене | Информатика (2) | Каневский А. С. | к/к3"
-    }
-   ]
+   "date": "2026-11-10",
+   "entries": []
   },
   "tomorrow": {
    "url": "http://smolapo.ru/sites/default/files/Studentam/2026-2027/izm2.docx",
-   "ok": true,
-   "date": "2026-11-10",
-   "entries": []
+   "ok": false,
+   "date": null,
+   "entries": [],
+   "error": "HTTP Error 404: Not Found"
   }
  }
 }
