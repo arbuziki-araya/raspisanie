@@ -1,14 +1,8 @@
 {
- "updated": "2026-11-10T20:54+03:00",
+ "updated": "2026-11-11T07:03+03:00",
  "files": {
   "today": {
    "url": "http://smolapo.ru/sites/default/files/Studentam/2026-2027/izm1.docx",
-   "ok": true,
-   "date": "2026-11-10",
-   "entries": []
-  },
-  "tomorrow": {
-   "url": "http://smolapo.ru/sites/default/files/Studentam/2026-2027/izm2.docx",
    "ok": true,
    "date": "2026-11-11",
    "entries": [
@@ -37,6 +31,13 @@
      "text": "Перенос с 2 пары | МДК.01.01 | Кириллова М. А. | 401"
     }
    ]
+  },
+  "tomorrow": {
+   "url": "http://smolapo.ru/sites/default/files/Studentam/2026-2027/izm2.docx",
+   "ok": false,
+   "date": null,
+   "entries": [],
+   "error": "HTTP Error 404: Not Found"
   }
  }
 }
