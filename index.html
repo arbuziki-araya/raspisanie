@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#f6f5f1">
 <link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
 <title>Расписание 612-Б</title>
 <style>
 :root{color-scheme:light;--bg:#f6f5f1;--card:#fff;--ink:#1d1d1f;--mute:#8a8a8e;--line:#e7e5df;--acc:#3b5bdb;--warn:#e8590c;--warnbg:#fff4e6;--add:#2f9e44;--addbg:#ebfbee}
@@ -95,6 +97,7 @@ let subgroup=+(localStorage.getItem("sg")??1);
 let selected=new Date(today);
 if(selected.getDay()===0)selected.setDate(selected.getDate()+1);
 let changes=null;
+let offline=false; // true, если замены взяты из сохранённой копии (service worker помечает такой ответ)
 
 function weekType(d){
   const base=new Date(BASE_MONDAY+"T00:00:00");
@@ -117,25 +120,45 @@ const TEACHER_RE=/^[А-ЯЁ][а-яё-]+\s+[А-ЯЁ]\.\s?(?:[А-ЯЁ]\.)?/;
 const ROOM_RE=/^(?:(?:к\s*\/\s*к\s*\d+|\d{2,3}[а-я]?|спортзал|чит\.?\s*зал)(?:\s*[\/,]\s*)?)+$/i;
 const SG_RE=/\s*\(\s*([12])\s*(?:п\/?г\.?|подгр(?:уппа)?\.?)?\s*\)|\s*\b([12])\s*(?:п\/?г\.?|подгр(?:уппа)?\.?)(?=\s|$|[,;)])/i;
 
-// «По замене | Информатика (1) | Каневский А. С. | к/к3» -> {sg:1, now:{subj,teacher,room}, old:null|{...}}
-// Если в тексте два предмета, первый — что было по файлу колледжа, последний — что стало.
+const isTeacher=l=>TEACHER_RE.test(l)||/^вакансия$/i.test(l);
+const isNone=l=>!!l&&/^нет$/i.test(l.subj||"");   // «Нет» в колонке «замена» — пары не будет
+// в ячейке несколько строк (по подгруппам): берём n-ю, а если строка одна — она общая для всех
+const nth=(a,i,n)=>a.length===n?a[i]:a.length===1?a[0]:a.join(" / ");
+
+// Текст замены — ячейки таблицы через « | », а внутри ячейки подгруппы идут отдельными строками (\n):
+//   «ТСИ (1)\nМДК.01.01 (2) | Каневский\nКириллова | МДК.04.01 (1)\nТСИ (2) | Ромашкова\nКаневский | 403\nк/к3»
+//   = было [предметы | преподаватели], стало [предметы | преподаватели | кабинеты]; n-я строка каждой ячейки — одна подгруппа.
+// Если наборов два, первый — что было по файлу колледжа, последний — что стало.
+// Результат: список {sg, now:{subj,teacher,room}, old:null|{...}, moved:null|N} — по записи на подгруппу.
 function parseChange(text){
-  const groups=[];let sg=null;
-  for(const t of String(text||"").split("|").map(s=>s.trim()).filter(Boolean)){
-    if(/^по\s+замене$/i.test(t))continue;
-    const g=groups[groups.length-1];
-    if(g&&!g.teacher&&TEACHER_RE.test(t)){g.teacher=t;continue}
-    if(g&&!g.room&&ROOM_RE.test(t)){g.room=t;continue}
-    const m=t.match(SG_RE);
-    const gsg=m?+(m[1]||m[2]):null;
-    groups.push({subj:t.replace(SG_RE,"").trim(),teacher:"",room:"",sg:gsg});
+  const sets=[];let moved=null;
+  for(const c of String(text||"").split("|").map(s=>s.trim()).filter(Boolean)){
+    const mv=c.match(/^перенос\s+с\s+(\d+)\s*пар/i);          // «Перенос с 4 пары»
+    if(mv){moved=+mv[1];continue}
+    if(/^по\s+замене$/i.test(c))continue;
+    const lines=c.split("\n").map(s=>s.trim()).filter(Boolean);
+    const cur=sets[sets.length-1];
+    if(cur&&!cur.teacher.length&&lines.every(isTeacher)){cur.teacher=lines;continue}
+    if(cur&&!cur.room.length&&lines.every(l=>ROOM_RE.test(l))){cur.room=lines;continue}
+    sets.push({subj:lines,teacher:[],room:[]});
   }
-  if(!groups.length)return{sg:null,now:{subj:String(text||"").trim(),teacher:"",room:""},old:null};
-  const now=groups[groups.length-1],old=groups.length>1?groups[0]:null;
-  return{sg:now.sg||(old&&old.sg)||null,now,old};
+  if(!sets.length)return[{sg:null,now:{subj:String(text||"").trim(),teacher:"",room:""},old:null,moved}];
+  const mk=(s,i)=>{
+    const m=s.subj[i].match(SG_RE);
+    return{subj:s.subj[i].replace(SG_RE,"").trim(),teacher:nth(s.teacher,i,s.subj.length),room:nth(s.room,i,s.subj.length),sg:m?+(m[1]||m[2]):null};
+  };
+  const last=sets[sets.length-1];
+  const now=last.subj.map((_,i)=>mk(last,i));
+  const was=sets.length>1?sets[0].subj.map((_,i)=>mk(sets[0],i)):[];
+  return now.map((n,i)=>{
+    const o=was.find(w=>n.sg&&w.sg===n.sg)||(was.length===now.length?was[i]:was.length===1?was[0]:null)||null;
+    return{sg:n.sg||(o&&o.sg)||null,now:n,old:o,moved};
+  });
 }
 
 const lkey=l=>norm(l.subj)+"|"+norm(l.teacher)+"|"+norm(l.room);
+// «МДК.01.01» и «МДК.01.01 Операционные системы» — один предмет
+const sameSubj=(a,b)=>{a=norm(a);b=norm(b);return !!a&&!!b&&(a===b||a.startsWith(b)||b.startsWith(a))};
 
 // Итог по паре для одной подгруппы s (1 или 2):
 // same — пара как в расписании, rep — заменена (есть что было), add — подстановка (раньше пары не было)
@@ -148,8 +171,12 @@ function resolveFor(base,chs,s){
     if(i>=0)rows.push({kind:"same",l:left.splice(i,1)[0]});else reps.push(e);
   });
   reps.forEach(e=>{
-    const o=left.length?left.shift():(e.old||null);
-    rows.push({kind:o?"rep":"add",l:e.now,old:o});
+    let k=e.old?left.findIndex(l=>sameSubj(l.subj,e.old.subj)):-1;       // что именно заменили
+    if(k<0&&left.length&&!e.syn)k=0;
+    if(e.syn&&k<0)return;                                                 // перенос: такой пары у этой подгруппы не было
+    const o=k>=0?left.splice(k,1)[0]:(e.old||null);
+    if(isNone(e.now)&&!o)return;                                          // «Нет», а пары и не было — показывать нечего
+    rows.push({kind:o?"rep":"add",l:e.now,old:o,moved:e.moved,movedTo:e.movedTo});
   });
   left.forEach(l=>rows.push({kind:"same",l}));
   return rows;
@@ -168,10 +195,17 @@ function computeDay(d){
   const slots=SCHEDULE[d.getDay()]||{};const wt=weekType(d);
   const byPair={},loose=[];
   (changesFor(d)||[]).forEach(e=>{
-    const pe=parseChange(e.text);
-    if(e.pairs&&e.pairs.length)e.pairs.forEach(p=>(byPair[p]=byPair[p]||[]).push(pe));
-    else if(!subgroup||!pe.sg||pe.sg===subgroup)loose.push(e.text);
+    const pes=parseChange(e.text);
+    if(e.pairs&&e.pairs.length)e.pairs.forEach(p=>(byPair[p]=byPair[p]||[]).push(...pes));
+    else if(!subgroup||pes.some(x=>!x.sg||x.sg===subgroup))loose.push(e.text);
   });
+  // «Перенос с N пары»: на паре N этот предмет больше не идёт. Если колледж не дал для N отдельной строки — снимаем его сами.
+  const explicit=new Set(Object.keys(byPair).map(Number)),extra=[];
+  Object.entries(byPair).forEach(([p,list])=>list.forEach(e=>{
+    if(e.moved&&e.moved!==+p&&!explicit.has(e.moved))
+      extra.push([e.moved,{sg:e.sg,now:{subj:"Нет",teacher:"",room:""},old:e.now,movedTo:+p,syn:true}]);
+  }));
+  extra.forEach(([p,e])=>(byPair[p]=byPair[p]||[]).push(e));
   const nums=[...new Set([...Object.keys(slots),...Object.keys(byPair)].map(Number))].sort((a,b)=>a-b);
   const items=[];let changed=0;
   nums.forEach(p=>{
@@ -228,9 +262,9 @@ function render(){
   if(items.length)dayBells.filter(b=>b.name).forEach(b=>items.push(b));
   const lnHtml=r=>{
     const tag=r.tag?`<span class="tag">${r.tag} п/г</span>`:"";
-    const lbl=r.kind==="same"?"":`<div class="lbl ${r.kind}">${r.kind==="rep"?"замена":"подстановка"}</div>`;
+    const lbl=r.kind==="same"?"":`<div class="lbl ${r.kind}">${r.movedTo?`перенос на ${r.movedTo} пару`:r.moved?`перенос с ${r.moved} пары`:r.kind==="rep"?"замена":"подстановка"}</div>`;
     const was=r.old?`<div class="was">было: <s>${esc(r.old.subj)}${r.old.teacher?", "+esc(r.old.teacher):""}${r.old.room?", "+esc(r.old.room):""}</s></div>`:"";
-    return`<div class="ln ${r.kind}"><div class="info">${lbl}<div class="s">${esc(r.l.subj)}${tag}</div>${r.l.teacher?`<div class="m">${esc(r.l.teacher)}</div>`:""}${was}</div>${r.l.room?`<div class="room">${esc(r.l.room)}</div>`:""}</div>`;
+    return`<div class="ln ${r.kind}"><div class="info">${lbl}<div class="s">${isNone(r.l)?"Пары нет":esc(r.l.subj)}${tag}</div>${r.l.teacher?`<div class="m">${esc(r.l.teacher)}</div>`:""}${was}</div>${r.l.room?`<div class="room">${esc(r.l.room)}</div>`:""}</div>`;
   };
   items.sort((a,b)=>pos(a)-pos(b)).forEach(it=>{
     if(it.name){
@@ -245,7 +279,8 @@ function render(){
   if(!day.items.length)list.innerHTML=`<div class="empty">Пар нет 🎉</div>`;
 
   const f=$("foot");
-  f.textContent=changes?`Замены обновлены: ${new Date(changes.updated).toLocaleString("ru-RU",{day:"numeric",month:"long",hour:"2-digit",minute:"2-digit"})}`:"Замены не загружены (сайт открыт без интернета или с компьютера как файл)";
+  const when=changes?new Date(changes.updated).toLocaleString("ru-RU",{day:"numeric",month:"long",hour:"2-digit",minute:"2-digit"}):"";
+  f.textContent=changes?(offline?`Нет сети — замены от ${when}, могли устареть`:`Замены обновлены: ${when}`):"Замены не загружены (сайт открыт без интернета или с компьютера как файл)";
 }
 
 document.querySelectorAll("#sg button").forEach(b=>b.onclick=()=>{subgroup=+b.dataset.v;localStorage.setItem("sg",subgroup);render()});
@@ -261,7 +296,8 @@ document.addEventListener("touchend",e=>{if(x0===null)return;const dx=e.changedT
   if(Math.abs(dx)<60)return;const d=new Date(selected);do{d.setDate(d.getDate()+(dx<0?1:-1))}while(d.getDay()===0);selected=d;render()});
 
 render();
-fetch("changes.json?"+Date.now()).then(r=>r.json()).then(j=>{changes=j;render()}).catch(()=>{});
+fetch("changes.json?"+Date.now()).then(r=>{offline=r.headers.get("x-from-cache")==="1";return r.json()}).then(j=>{changes=j;render()}).catch(()=>{});
+if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{}); // работа без интернета
 </script>
 <div style="text-align:center;margin-top:10px"><a id="spooky" style="font-size:11px;color:#bbb;cursor:pointer">© 2026</a></div>
 <div id="dark" style="position:fixed;inset:0;background:#000;opacity:0;pointer-events:none;z-index:99"></div>
