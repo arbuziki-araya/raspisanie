@@ -96,8 +96,18 @@ def parse(doc):
     return entries
 
 
+def load_previous():
+    """Прошлый changes.json: если сайт колледжа недоступен, оставляем из него последние удачные данные."""
+    try:
+        with open("changes.json", encoding="utf-8") as f:
+            return json.load(f)
+    except (OSError, ValueError):
+        return {}
+
+
 def main():
     now = dt.datetime.now(TZ)
+    prev = load_previous()
     result = {"updated": now.isoformat(timespec="minutes"), "files": {}}
     for key, name in FILES.items():
         url = BASE + name
@@ -112,8 +122,13 @@ def main():
             d = find_date(head) or (now.date() + dt.timedelta(days=1 if key == "tomorrow" else 0))
             info.update(ok=True, date=d.isoformat(), entries=parse(doc))
         except Exception as e:  # сайт недоступен или файл другого формата
+            old = (prev.get("files") or {}).get(key) or {}
+            if old.get("ok"):   # не затираем прошлые замены пустыми данными
+                info = {**old, "stale": True}
             info["error"] = str(e)[:200]
         result["files"][key] = info
+    if not any(i["ok"] and not i.get("stale") for i in result["files"].values()):
+        result["updated"] = prev.get("updated", result["updated"])   # свежих данных нет — время не обновляем
     with open("changes.json", "w", encoding="utf-8") as f:
         json.dump(result, f, ensure_ascii=False, indent=1)
     print(json.dumps(result, ensure_ascii=False, indent=1))
