@@ -1,14 +1,8 @@
 {
- "updated": "2026-11-15T20:46+03:00",
+ "updated": "2026-11-16T07:29+03:00",
  "files": {
   "today": {
    "url": "http://smolapo.ru/sites/default/files/Studentam/2026-2027/izm1.docx",
-   "ok": true,
-   "date": "2026-11-14",
-   "entries": []
-  },
-  "tomorrow": {
-   "url": "http://smolapo.ru/sites/default/files/Studentam/2026-2027/izm2.docx",
    "ok": true,
    "date": "2026-11-16",
    "entries": [
@@ -47,6 +41,19 @@
       6
      ],
      "text": "Перенос с 2 пары | МДК.04.01(2) | Ромашкова И. А. | 403"
+    }
+   ]
+  },
+  "tomorrow": {
+   "url": "http://smolapo.ru/sites/default/files/Studentam/2026-2027/izm2.docx",
+   "ok": true,
+   "date": "2026-11-17",
+   "entries": [
+    {
+     "pairs": [
+      4
+     ],
+     "text": "Электротехника и схемотехника | Антипов В. А. | Физкультура | Голицин И. В. | Сп/зал"
     }
    ]
   }
