@@ -1,36 +1,36 @@
 {
- "updated": "2026-11-20T21:06+03:00",
+ "updated": "2026-11-21T06:59+03:00",
  "files": {
   "today": {
    "url": "http://smolapo.ru/sites/default/files/Studentam/2026-2027/izm1.docx",
    "ok": true,
-   "date": "2026-11-20",
+   "date": "2026-11-21",
+   "entries": []
+  },
+  "tomorrow": {
+   "url": "http://smolapo.ru/sites/default/files/Studentam/2026-2027/izm2.docx",
+   "ok": true,
+   "date": "2026-11-23",
    "entries": [
     {
      "pairs": [
       2
      ],
-     "text": "Ин язык в ПД (1) | Володина Е. К. | Информатика (1) - замещ | Итунина Е. А. | к/к4"
+     "text": "замещение | Информатика(1) | Каневский А. С. | к/к3"
     },
     {
      "pairs": [
-      4
+      3
      ],
-     "text": "Информатика (1) | Вакансия | Ин язык в ПД (1) | Володина Е. К. | 208"
+     "text": "ПОЗИ | Сиволова О. Г. | МДК.01.01 | Кириллова М. А. | 401"
     },
     {
      "pairs": [
       5
      ],
-     "text": "Информатика (2) | Вакансия | Информатика (2) | Итунина Е. А. | к/к4"
+     "text": "замещение | Информатика(2) | Каневский А. С. | к/к3"
     }
    ]
-  },
-  "tomorrow": {
-   "url": "http://smolapo.ru/sites/default/files/Studentam/2026-2027/izm2.docx",
-   "ok": true,
-   "date": "2026-11-21",
-   "entries": []
   }
  }
 }
