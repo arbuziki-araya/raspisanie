@@ -1,11 +1,24 @@
 {
- "updated": "2026-11-24T21:01+03:00",
+ "updated": "2026-11-25T07:18+03:00",
  "files": {
   "today": {
    "url": "http://smolapo.ru/sites/default/files/Studentam/2026-2027/izm1.docx",
    "ok": true,
-   "date": "2026-11-24",
-   "entries": []
+   "date": "2026-11-25",
+   "entries": [
+    {
+     "pairs": [
+      2
+     ],
+     "text": "МДК.01.01 | Кириллова М. А. | Физкультура | Голицин И. В. | Сп/зал"
+    },
+    {
+     "pairs": [
+      3
+     ],
+     "text": "Информатика | Вакансия | Информатика | Каневский А. С. | к/к3"
+    }
+   ]
   },
   "tomorrow": {
    "url": "http://smolapo.ru/sites/default/files/Studentam/2026-2027/izm2.docx",
@@ -24,7 +37,9 @@
      ],
      "text": "Информатика | Вакансия | Информатика | Каневский А. С. | к/к3"
     }
-   ]
+   ],
+   "stale": true,
+   "error": "HTTP Error 404: Not Found"
   }
  }
 }
