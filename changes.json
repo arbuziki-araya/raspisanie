@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-26T15:10+03:00",
+ "updated": "2026-11-26T16:33+03:00",
  "files": {
   "today": {
    "url": "http://smolapo.ru/sites/default/files/Studentam/2026-2027/izm1.docx",
@@ -17,17 +17,28 @@
   "tomorrow": {
    "url": "http://smolapo.ru/sites/default/files/Studentam/2026-2027/izm2.docx",
    "ok": true,
-   "date": "2026-11-26",
+   "date": "2026-11-27",
    "entries": [
     {
      "pairs": [
       1
      ],
-     "text": "Перенос с 4 пары | МДК.04.01 (2) | Ромашкова И. А. | 403"
+     "text": "Перенос с 3 пары | ТСИ | Каневский А. С. | к/к3"
+    },
+    {
+     "pairs": [
+      3
+     ],
+     "text": "ТСИ | Каневский А. С. | МДК.01.01 | Кириллова М. А. | 401"
+    },
+    {
+     "pairs": [
+      4,
+      5
+     ],
+     "text": "ПОЗИ | Сиволова О. Г. | Нет"
     }
-   ],
-   "stale": true,
-   "error": "HTTP Error 404: Not Found"
+   ]
   }
  }
 }
